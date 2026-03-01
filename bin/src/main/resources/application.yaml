@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: shopping-cart
+  
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/shopping-cart?createDatabaseIfNotExist=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+    
+  jpa:
+    show-sql: true
+    
+    properties:
+        hibernate:
+            format_sql: true
+    
+    hibernate:
+        ddl-auto: update
+    
+api:
+  prefix: /api/v1
+  
+server:
+  port: 8080

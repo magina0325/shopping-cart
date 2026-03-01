@@ -30,12 +30,18 @@ public class OrderService implements IOrderService {
 	
 	@Override
 	public Order placeOrder(Long userId) {
+		
+		// create and save the order
 		Cart cart = cartService.getCartByUserId(userId);
 		Order order = this.createOrder(cart);
 		order.setItems(this.createOrderItems(order, cart));
 		order.setTotalAmount(this.calculateTotalAmount(order.getItems()));
 		order = this.orderRepository.save(order);
+		
+		// remove the items in the order from the cart
 		this.cartService.clearCart(this.cartService.getCartByUserId(userId).getId());
+		
+		
 		return order;
 	}
 	
@@ -90,9 +96,9 @@ public class OrderService implements IOrderService {
 	// order item ==========================
 	// =====================
 	
-	public OrderItem addItemToOrder() {
-		return null;
-	}
+//	public OrderItem addItemToOrder() {
+//		return null;
+//	}
 	
 	
 }
