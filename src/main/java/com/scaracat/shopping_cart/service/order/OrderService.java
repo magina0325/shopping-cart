@@ -19,6 +19,7 @@ import com.scaracat.shopping_cart.repo.OrderRepository;
 import com.scaracat.shopping_cart.repo.ProductRepository;
 import com.scaracat.shopping_cart.service.cart.CartService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,11 +28,11 @@ public class OrderService implements IOrderService {
 
 	private final CartService cartService;
 	private final OrderRepository orderRepository;
-	private final OrderItemRepository orderItemRepository;
 	private final ProductRepository productRepository;
 	private final ModelMapper modelMapper;
 	
 	@Override
+	@Transactional
 	public OrderDto placeOrder(Long userId) {
 		
 		// create and save the order
@@ -42,7 +43,7 @@ public class OrderService implements IOrderService {
 		order = this.orderRepository.save(order);
 		
 		// remove the items in the order from the cart
-		this.cartService.clearCart(this.cartService.getCartByUserId(userId).getId());
+		this.cartService.clearCartItems(this.cartService.getCartByUserId(userId).getId());
 		
 		
 		return this.convertOrderToOrderDto(order);

@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Cart;
+import com.scaracat.shopping_cart.model.User;
 import com.scaracat.shopping_cart.response.ApiResponse;
 import com.scaracat.shopping_cart.service.cart.ICartService;
+import com.scaracat.shopping_cart.service.user.IUserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class CartController {
 
 	private final ICartService cartService;
+	private final IUserService userService;
 
 	@GetMapping("/get/{cartId}")
 	public ResponseEntity<ApiResponse> getCart(@PathVariable Long cartId) {
@@ -41,7 +44,7 @@ public class CartController {
 	@DeleteMapping("/clear/{cartId}")
 	public ResponseEntity<ApiResponse> clearCart(@PathVariable Long cartId) {
 		try {
-			cartService.clearCart(cartId);
+			cartService.clearCartItems(cartId);
 		} catch(ResourceNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		} catch(Exception e) {
@@ -70,14 +73,14 @@ public class CartController {
 	
 	@PostMapping("/add-item")
 	public ResponseEntity<ApiResponse> addItemToCart(
-			@RequestParam(required=false) Long cartId, 
 			@RequestParam Long productId, 
 			@RequestParam int quantity) {
 		try {
-			if (cartId == null) {
-				cartId = cartService.initializeNewCart();
-			}
-			cartService.addItemToCart(cartId, productId, quantity);
+			
+			User user = userService.getUserById(1L);
+			Cart cart = cartService.initializeNewCart(user);
+			
+			cartService.addItemToCart(cart.getId(), productId, quantity);
 		}  catch(ResourceNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		} catch(Exception e) {

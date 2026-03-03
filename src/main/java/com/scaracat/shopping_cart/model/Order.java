@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.scaracat.shopping_cart.enums.OrderStatus;
 
 import jakarta.persistence.CascadeType;
@@ -43,6 +44,7 @@ public class Order {
 	private Long id;
 	
 	@OneToMany(mappedBy="order", orphanRemoval = true, cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<OrderItem> items = new ArrayList<>();
 	
 	@ManyToOne

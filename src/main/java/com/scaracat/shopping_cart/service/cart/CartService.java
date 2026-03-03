@@ -1,6 +1,7 @@
 package com.scaracat.shopping_cart.service.cart;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
@@ -10,11 +11,13 @@ import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Cart;
 import com.scaracat.shopping_cart.model.CartItem;
 import com.scaracat.shopping_cart.model.Product;
+import com.scaracat.shopping_cart.model.User;
 import com.scaracat.shopping_cart.repo.CartItemRepository;
 import com.scaracat.shopping_cart.repo.CartRepository;
 import com.scaracat.shopping_cart.repo.ProductRepository;
 import com.scaracat.shopping_cart.service.product.ProductService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,7 +27,6 @@ public class CartService implements ICartService {
 	private final CartRepository cartRepository;
 	private final CartItemRepository cartItemRepository;
 	private final ProductService productService;
-	private final AtomicLong cartIdGenerator = new AtomicLong(0);
 	
 	@Override
 	public Cart getCart(Long cartId) {
@@ -35,17 +37,11 @@ public class CartService implements ICartService {
 	}
 
 	@Override
-	public Cart getCartByUserId(Long userId) {
-		return cartRepository.findByUserId(userId)
-				.orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
-	}
-	
-	@Override
-	public void clearCart(Long id) {
+	@Transactional
+	public void clearCartItems(Long id) {
 		Cart cart = this.getCart(id);
 		cartItemRepository.deleteAllByCartId(id);
 		cart.getItems().clear();
-		cartRepository.deleteById(id);
 	}
 
 	@Override
@@ -53,6 +49,11 @@ public class CartService implements ICartService {
 		return this.getCart(id).getTotalAmount();
 	}
 
+	@Override
+	public Cart getCartByUserId(Long userId) {
+		return cartRepository.findByUserId(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+	}
 	
 	// ---------------------------------------
 	// handling cart items
@@ -106,9 +107,13 @@ public class CartService implements ICartService {
 	}
 
 	@Override
-	public Long initializeNewCart() {
-		Cart newCart = new Cart();
-		return cartRepository.save(newCart).getId();
+	public Cart initializeNewCart(User user) {
+		return cartRepository.findByUserId(user.getId())
+			.orElseGet(() -> {
+				Cart cart = new Cart();
+				cart.setUser(user);
+				return cartRepository.save(cart);
+			});
 	}
 	
 	

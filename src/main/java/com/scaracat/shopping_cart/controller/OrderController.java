@@ -50,7 +50,7 @@ public class OrderController {
 		return ResponseEntity.ok(new ApiResponse("Success", order));
 	}
 	
-	@GetMapping("/order/{userId}")
+	@GetMapping("/user/{userId}")
 	public ResponseEntity<ApiResponse> getUserOrders(@PathVariable Long userId) {
 		List<OrderDto> res = null;
 		try {
