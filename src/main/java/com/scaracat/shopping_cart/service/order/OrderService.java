@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.scaracat.shopping_cart.dto.OrderDto;
 import com.scaracat.shopping_cart.enums.OrderStatus;
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Cart;
@@ -27,9 +29,10 @@ public class OrderService implements IOrderService {
 	private final OrderRepository orderRepository;
 	private final OrderItemRepository orderItemRepository;
 	private final ProductRepository productRepository;
+	private final ModelMapper modelMapper;
 	
 	@Override
-	public Order placeOrder(Long userId) {
+	public OrderDto placeOrder(Long userId) {
 		
 		// create and save the order
 		Cart cart = cartService.getCartByUserId(userId);
@@ -42,7 +45,7 @@ public class OrderService implements IOrderService {
 		this.cartService.clearCart(this.cartService.getCartByUserId(userId).getId());
 		
 		
-		return order;
+		return this.convertOrderToOrderDto(order);
 	}
 	
 	private BigDecimal calculateTotalAmount(List<OrderItem> orderItemList) {
@@ -81,17 +84,23 @@ public class OrderService implements IOrderService {
 	}
 
 	@Override
-	public Order getOrder(Long orderId) {
-		return orderRepository.findById(orderId)
+	public OrderDto getOrder(Long orderId) {
+		return orderRepository.findById(orderId).map(this::convertOrderToOrderDto)
 				.orElseThrow(() -> new ResourceNotFoundException("Order with ID: " + orderId + " does not exist."));
 	}
 	
 	@Override
-	public List<Order> getOrdersOfUser(Long userId) {
-		return this.orderRepository.findByUserId(userId)
+	public List<OrderDto> getOrdersOfUser(Long userId) {
+		List<Order> orders =  this.orderRepository.findByUserId(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("Orders not found"));
+		
+		return orders.stream().map(this::convertOrderToOrderDto).toList();
 	}
 
+	private OrderDto convertOrderToOrderDto(Order order) {
+		return modelMapper.map(order, OrderDto.class);
+	}
+	
 	// ====================
 	// order item ==========================
 	// =====================

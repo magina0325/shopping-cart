@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.scaracat.shopping_cart.dto.OrderDto;
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Order;
 import com.scaracat.shopping_cart.response.ApiResponse;
@@ -26,7 +27,7 @@ public class OrderController {
 	
 	@PostMapping("/order")
 	public ResponseEntity<ApiResponse> createOrder(@RequestParam Long userId) {
-		Order order;
+		OrderDto order;
 		try {
 			order = orderService.placeOrder(userId);
 		} catch (Exception e) {
@@ -38,7 +39,7 @@ public class OrderController {
 	
 	@GetMapping("/order/{orderId}")
 	public ResponseEntity<ApiResponse> getOrderById(@PathVariable Long orderId) {
-		Order order;
+		OrderDto order;
 		try {
 			order = orderService.getOrder(orderId);
 		} catch (ResourceNotFoundException e) {
@@ -51,7 +52,7 @@ public class OrderController {
 	
 	@GetMapping("/order/{userId}")
 	public ResponseEntity<ApiResponse> getUserOrders(@PathVariable Long userId) {
-		List<Order> res = null;
+		List<OrderDto> res = null;
 		try {
 			res = orderService.getOrdersOfUser(userId);
 		} catch (ResourceNotFoundException e) {
