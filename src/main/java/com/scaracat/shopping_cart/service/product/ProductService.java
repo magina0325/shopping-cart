@@ -1,5 +1,6 @@
 package com.scaracat.shopping_cart.service.product;
 
+import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.scaracat.shopping_cart.dto.ImageDto;
 import com.scaracat.shopping_cart.dto.ProductDto;
+import com.scaracat.shopping_cart.exception.AlreadyExistException;
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Category;
 import com.scaracat.shopping_cart.model.Image;
@@ -37,6 +39,11 @@ public class ProductService implements IProductService{
 		// check if the category exists in db
 		// fetch if yes
 		// persist if no
+		if (this.productExists(request.getName(), request.getBrand())) {
+			throw new AlreadyExistException(
+					"Product with the name: " + request.getBrand() + " of the brand " + request.getBrand() + " already exists.");
+		}
+		
 		Category category = categoryRepository.findByName(request.getCategory())
 				.orElseGet(() -> {
 					Category temp = new Category(request.getCategory());
@@ -44,6 +51,10 @@ public class ProductService implements IProductService{
 				});
 		request.setCategory(category.getName());
 		return productRepository.save(createProduct(request, category));
+	}
+	
+	private boolean productExists(String name, String brand) {
+		return productRepository.existsByNameAndBrand(name, brand);
 	}
 	
 	private Product createProduct(AddProductRequest request, Category category) {
@@ -151,6 +162,8 @@ public class ProductService implements IProductService{
 		List<ImageDto> imageDtos = images.stream()
 				.map(image -> modelMapper.map(images, ImageDto.class))
 				.toList();
+		res.setImages(imageDtos);
+		
 		return res;
 	}
 	

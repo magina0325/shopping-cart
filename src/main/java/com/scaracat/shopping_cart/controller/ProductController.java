@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.scaracat.shopping_cart.dto.ImageDto;
 import com.scaracat.shopping_cart.dto.ProductDto;
+import com.scaracat.shopping_cart.exception.AlreadyExistException;
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Product;
 import com.scaracat.shopping_cart.request.AddProductRequest;
@@ -66,6 +68,8 @@ public class ProductController {
 		Product product;
 		try {
 			product = productService.addProduct(addProductRequest);
+		} catch (AlreadyExistException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(e.getMessage(), null)) ;
 		} catch (Exception e) {
 			return ResponseEntity.internalServerError().body(new ApiResponse(e.getMessage(), null));
 		}
