@@ -28,3 +28,8 @@ api:
   
 server:
   port: 8080
+  
+auth:
+  token:
+    expirationInMils: 3600000
+    jwtSecret: 5SIcv40vkAlhGYO9vipggmYlMIdYzwogyqFHn2QGtWi

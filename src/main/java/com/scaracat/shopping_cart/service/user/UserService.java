@@ -1,6 +1,9 @@
 package com.scaracat.shopping_cart.service.user;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.scaracat.shopping_cart.dto.UserDto;
@@ -19,7 +22,16 @@ public class UserService implements IUserService {
 	
 	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
+	private final PasswordEncoder passwordEncoder;
 
+	@Override
+	public User getAuthenticatedUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String email = authentication.getName();
+		return userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("Can't retrieve user info"));
+	}
+	
 	@Override
 	public User getUserById(Long userId) {
 		return this.userRepository.findById(userId)
@@ -33,7 +45,7 @@ public class UserService implements IUserService {
 		
 		User user = new User();
 		user.setEmail(request.getEmail());
-		user.setPassword(request.getPassword());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setFirstName(request.getFirstName());
 		user.setLastName(request.getLastName());
 		

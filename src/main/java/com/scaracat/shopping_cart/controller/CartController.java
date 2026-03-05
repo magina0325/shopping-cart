@@ -1,5 +1,6 @@
 package com.scaracat.shopping_cart.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Cart;
@@ -17,6 +19,7 @@ import com.scaracat.shopping_cart.response.ApiResponse;
 import com.scaracat.shopping_cart.service.cart.ICartService;
 import com.scaracat.shopping_cart.service.user.IUserService;
 
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -77,12 +80,14 @@ public class CartController {
 			@RequestParam int quantity) {
 		try {
 			
-			User user = userService.getUserById(1L);
+			User user = userService.getAuthenticatedUser();
 			Cart cart = cartService.initializeNewCart(user);
 			
 			cartService.addItemToCart(cart.getId(), productId, quantity);
-		}  catch(ResourceNotFoundException e) {
+		} catch(ResourceNotFoundException e) {
 			return ResponseEntity.notFound().build();
+		} catch(JwtException e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(e.getMessage(), null));
 		} catch(Exception e) {
 			return ResponseEntity.internalServerError()
 					.body(new ApiResponse(e.getMessage(), null));
