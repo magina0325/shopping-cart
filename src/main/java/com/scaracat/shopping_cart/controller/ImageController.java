@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class ImageController {
 	private final IImageService imageService;
 	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@PostMapping("/upload")
 	public ResponseEntity<ApiResponse> saveImages(@RequestParam List<MultipartFile> files, @RequestParam Long productId) {
 		List<ImageDto> res;
@@ -47,7 +50,14 @@ public class ImageController {
 	
 	@GetMapping("/image/download/{imageId}")
 	public ResponseEntity<Resource> downloadImage(@PathVariable Long imageId) throws SQLException {
-		Image image = imageService.getImageById(imageId);
+		Image image;
+		
+		try {
+			image = imageService.getImageById(imageId);
+		} catch (ResourceNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+		
 		ByteArrayResource resource = new ByteArrayResource(image.getImage().getBytes(1, (int) image.getImage().length()));
 		
 		return ResponseEntity.ok().contentType(MediaType.parseMediaType(image.getFileType()))
@@ -55,6 +65,7 @@ public class ImageController {
 				.body(resource);
 	}
 	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@PutMapping("/image/{imageId}/update")
 	public ResponseEntity<ApiResponse> updateIMage(@PathVariable Long imageId, @RequestBody MultipartFile file) {
 		try {
@@ -68,6 +79,7 @@ public class ImageController {
 		return ResponseEntity.ok(new ApiResponse("Image updated.", null));
 	}
 	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@DeleteMapping("/image/{imageId}/delete")
 	public ResponseEntity<ApiResponse> deleteImage(@PathVariable Long imageId) {
 		try {

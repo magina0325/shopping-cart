@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 
+import com.scaracat.shopping_cart.exception.InsufficientInventoryException;
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Cart;
 import com.scaracat.shopping_cart.model.User;
@@ -90,6 +91,9 @@ public class CartController {
 					.body(new ApiResponse(e.getMessage(), null));
 		} catch(JwtException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(new ApiResponse(e.getMessage(), null));
+		} catch (InsufficientInventoryException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT)
 					.body(new ApiResponse(e.getMessage(), null));
 		} catch(Exception e) {
 			return ResponseEntity.internalServerError()

@@ -77,6 +77,8 @@ A simple backend system for an e-commerce platform built with Java Spring Boot. 
 | --- | --- | --- | --- |
 | /upload | POST | Uploads multiple images for a specific product. | Admin Only |
 | /image/download/{imageId} | GET | Downloads the image file directly. | Public |
+| /image/{imageId}/delete | DELETE | Delete the specific image. | Admin Only |
+|  /image/{imageId}/update | PUT | Update an existing image. | Admin Only |
 
 
 # 🏗️ Architectural Highlights

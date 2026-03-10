@@ -62,6 +62,7 @@ public class CartService implements ICartService {
 		cart.getItems().clear();
 	}
 	
+	@Transactional
 	@Override
 	public void addItemToCart(Long cartId, Long productId, int quantity) {
 		
@@ -82,6 +83,7 @@ public class CartService implements ICartService {
 			throw new InsufficientInventoryException("There is not enough inventory for the selected product.");
 		}
 		cartItem.setQuantity(cartItem.getQuantity() + quantity);
+		cart.addItem(cartItem);
 		
 		cartRepository.save(cart);
 	}

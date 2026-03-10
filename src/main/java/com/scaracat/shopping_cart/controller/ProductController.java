@@ -95,7 +95,7 @@ public class ProductController {
 	
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@DeleteMapping("/delete/{productId}")
-	public ResponseEntity<ApiResponse> deleteProduct(Long productId) {
+	public ResponseEntity<ApiResponse> deleteProduct(@PathVariable Long productId) {
 		try {
 			productService.deleteProductById(productId);
 		} catch(ResourceNotFoundException e) {
