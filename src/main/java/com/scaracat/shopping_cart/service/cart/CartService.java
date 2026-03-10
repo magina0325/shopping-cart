@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Service;
 
 import com.scaracat.shopping_cart.exception.AlreadyExistException;
+import com.scaracat.shopping_cart.exception.InsufficientInventoryException;
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Cart;
 import com.scaracat.shopping_cart.model.CartItem;
@@ -37,14 +38,6 @@ public class CartService implements ICartService {
 	}
 
 	@Override
-	@Transactional
-	public void clearCartItems(Long id) {
-		Cart cart = this.getCart(id);
-		cartItemRepository.deleteAllByCartId(id);
-		cart.getItems().clear();
-	}
-
-	@Override
 	public BigDecimal getTotalPrice(Long id) {
 		return this.getCart(id).getTotalAmount();
 	}
@@ -62,17 +55,33 @@ public class CartService implements ICartService {
 	// no need to subtract, only subtract when placing order
 	
 	@Override
+	@Transactional
+	public void clearCartItems(Long id) {
+		Cart cart = this.getCart(id);
+		cartItemRepository.deleteAllByCartId(id);
+		cart.getItems().clear();
+	}
+	
+	@Override
 	public void addItemToCart(Long cartId, Long productId, int quantity) {
+		
 		Cart cart = this.getCart(cartId);
 		Product product = productService.getProductById(productId); 
-				
-		cartItemRepository.findByCartIdAndProductId(cartId, productId)
-				.ifPresentOrElse((cartItem) -> {
-					throw new AlreadyExistException("Product already exist in the cart.");
-				}, () -> {
-					CartItem cartItem = new CartItem(product, quantity);
-					cart.addItem(cartItem);
-				});
+		
+		// get the cart item if exists
+		CartItem cartItem = cartItemRepository.findByCartIdAndProductId(cartId, productId)
+				.orElse(null);
+		
+		// initialize new cart
+		if (cartItem == null) {
+			cartItem = new CartItem(product, 0);
+		}
+		
+		// check for inventory
+		if (cartItem.getQuantity() + quantity > product.getInventory()) {
+			throw new InsufficientInventoryException("There is not enough inventory for the selected product.");
+		}
+		cartItem.setQuantity(cartItem.getQuantity() + quantity);
 		
 		cartRepository.save(cart);
 	}

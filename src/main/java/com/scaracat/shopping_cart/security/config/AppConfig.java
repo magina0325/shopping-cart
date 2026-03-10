@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 @EnableMethodSecurity(prePostEnabled = true)
 public class AppConfig {
 	
-	private static final List<String> SECURED_URLS = List.of("/api/v1/cart/**");
+	private static final List<String> SECURED_URLS = List.of("/api/v1/carts/**");
 	
 	private final MyUserDetailsService userDetailsService;
 	private final JwtAuthEntryPoint authEntryPoint;

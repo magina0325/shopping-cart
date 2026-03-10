@@ -74,6 +74,7 @@ public class CartController {
 	// CART ITEM
 	// -----------------
 	
+	
 	@PostMapping("/add-item")
 	public ResponseEntity<ApiResponse> addItemToCart(
 			@RequestParam Long productId, 
@@ -85,15 +86,17 @@ public class CartController {
 			
 			cartService.addItemToCart(cart.getId(), productId, quantity);
 		} catch(ResourceNotFoundException e) {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new ApiResponse(e.getMessage(), null));
 		} catch(JwtException e) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(e.getMessage(), null));
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(new ApiResponse(e.getMessage(), null));
 		} catch(Exception e) {
 			return ResponseEntity.internalServerError()
 					.body(new ApiResponse(e.getMessage(), null));
 		}
 		
-		return ResponseEntity.ok(new ApiResponse("Success.", null));
+		return ResponseEntity.ok(new ApiResponse("Add Item Success.", null));
 	}
 	
 	@DeleteMapping("/delete-item")

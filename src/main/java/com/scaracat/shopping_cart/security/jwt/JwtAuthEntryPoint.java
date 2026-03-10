@@ -31,7 +31,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
         final Map<String, Object> body = new LinkedHashMap<>();
         //body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         body.put("error", "Unauthorized");
-        body.put("message", "You need to login to perform this action.");
+        body.put("message", "You are not authorized for this action.");
         //body.put("path", request.getServletPath());
 
         // Use Jackson to write the Map as JSON to the response stream

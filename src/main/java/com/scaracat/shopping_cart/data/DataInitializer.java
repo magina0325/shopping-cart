@@ -1,5 +1,7 @@
 package com.scaracat.shopping_cart.data;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -10,11 +12,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
+import com.scaracat.shopping_cart.model.Category;
+import com.scaracat.shopping_cart.model.Product;
 import com.scaracat.shopping_cart.model.Role;
 import com.scaracat.shopping_cart.model.User;
+import com.scaracat.shopping_cart.repo.ProductRepository;
 import com.scaracat.shopping_cart.repo.RoleRepository;
 import com.scaracat.shopping_cart.repo.UserRepository;
+import com.scaracat.shopping_cart.request.AddProductRequest;
 
+import io.jsonwebtoken.lang.Arrays;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +32,9 @@ public class DataInitializer implements ApplicationListener<ApplicationReadyEven
 	
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
+	
 	private final PasswordEncoder passwordEncoder;
+	
 	
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {

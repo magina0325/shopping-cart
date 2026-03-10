@@ -2,6 +2,7 @@ package com.scaracat.shopping_cart.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.scaracat.shopping_cart.dto.OrderDto;
+import com.scaracat.shopping_cart.exception.InsufficientInventoryException;
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Order;
 import com.scaracat.shopping_cart.response.ApiResponse;
@@ -30,7 +32,11 @@ public class OrderController {
 		OrderDto order;
 		try {
 			order = orderService.placeOrder(userId);
-		} catch (Exception e) {
+		}
+		catch (InsufficientInventoryException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse(e.getMessage(), null));
+		}
+		catch (Exception e) {
 			return ResponseEntity.internalServerError().body(new ApiResponse(e.getMessage(), null));
 		}
 		

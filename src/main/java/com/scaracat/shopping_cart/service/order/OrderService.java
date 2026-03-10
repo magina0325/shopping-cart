@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.scaracat.shopping_cart.dto.OrderDto;
 import com.scaracat.shopping_cart.enums.OrderStatus;
+import com.scaracat.shopping_cart.exception.InsufficientInventoryException;
 import com.scaracat.shopping_cart.exception.ResourceNotFoundException;
 import com.scaracat.shopping_cart.model.Cart;
 import com.scaracat.shopping_cart.model.Order;
@@ -68,7 +69,13 @@ public class OrderService implements IOrderService {
 	private List<OrderItem> createOrderItems(Order order, Cart cart) {
 		return cart.getItems().stream().map(cartItem -> {
 			Product product = cartItem.getProduct();
-			// TODO: handle insufficient inventory
+			
+			// handle insufficient inventory
+			if (product.getInventory() < cartItem.getQuantity()) {
+				cartService.removeItemFromCart(cart.getId(), cartItem.getId());
+				throw new InsufficientInventoryException("The item :" + cartItem.getProduct().getName() + " is no longer available. Please try again.");
+			}
+				
 			product.setInventory(product.getInventory() - cartItem.getQuantity());
 			productRepository.save(product);
 			
